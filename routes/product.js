@@ -92,17 +92,27 @@ router.delete('/deleteProduct/:id', async (req, res) => {
 
 router.delete('/deleteCategory/:id', async (req, res) => {
   try {
-    const { id } = req.params; // Silinecek ürünün ID'sini al
+    const { id } = req.params; // Silinecek kategorinin ID'sini al
 
-    // Ürünü sil
-    const deletedCategory = await Category.findByIdAndDelete(id);
+    // Öncelikle ilgili kategorinin bir üründe kullanılıp kullanılmadığını kontrol et
+    const isCategoryUsed = await Product.findOne({ category_id: id });
 
-    // Eğer ürün bulunamazsa
-    if (!deletedCategory) {
-      return res.status(404).json({ message: 'Ürün bulunamadı!' });
+    // Eğer kategori kullanılıyorsa hata döndür
+    if (isCategoryUsed) {
+      return res.status(400).json({ 
+        message: 'Bu kategori bazı ürünlerde kullanılıyor, bu yüzden silinemez!' 
+      });
     }
 
-    res.status(200).json({ message: 'Ürün başarıyla silindi!', category: deletedCategory });
+    // Kategori silme işlemi
+    const deletedCategory = await Category.findByIdAndDelete(id);
+
+    // Eğer kategori bulunamazsa
+    if (!deletedCategory) {
+      return res.status(404).json({ message: 'Kategori bulunamadı!' });
+    }
+
+    res.status(200).json({ message: 'Kategori başarıyla silindi!', category: deletedCategory });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
