@@ -7,12 +7,12 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/'); // Tüm dosyalar "uploads" klasörüne kaydedilecek
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname)); // Benzersiz isim ver
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9); 
+    cb(null, uniqueSuffix + path.extname(file.originalname)); // Benzersiz isim ver, orijinal uzantıyı koru
   }
 });
 
-// Sadece resim dosyalarına izin ver (JPEG, PNG vs.)
+// Sadece resim dosyalarına izin ver (JPEG, PNG, vs.)
 const upload = multer({ 
   storage: storage,
   fileFilter: function (req, file, cb) {
@@ -27,4 +27,5 @@ const upload = multer({
     }
   }
 });
+
 module.exports = upload;
