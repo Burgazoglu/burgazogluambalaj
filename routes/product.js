@@ -37,7 +37,6 @@ router.post('/addNewProducts', upload.array('images', 5), async (req, res) => {
   }
 });
 
-
 // Kategorilerin tümünü listeleme
 router.get('/getAllCategories', async (req, res) => {
   try {
@@ -115,6 +114,41 @@ router.delete('/deleteCategory/:id', async (req, res) => {
     res.status(200).json({ message: 'Kategori başarıyla silindi!', category: deletedCategory });
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/getProductsByCategory/:categoryId', async (req, res) => {
+  try {
+    const { categoryId } = req.params; // Seçilen kategori ID'sini al
+
+    // Kategori ID'sine bağlı tüm ürünleri getir ve category_id'yi populate et
+    const products = await Product.find({ category_id: categoryId })
+      .populate('category_id', 'name')
+      .lean()
+      .exec();
+
+    // Ürünleri formatla
+    const formattedProducts = products.map(product => {
+      return {
+        ...product,
+        category: {
+          id: product.category_id._id,
+          name: product.category_id.name
+        }
+      };
+    });
+
+    // Başarılı yanıt gönder
+    res.status(200).json({
+      isSuccess: true,
+      data: formattedProducts
+    });
+  } catch (error) {
+    // Hata durumunda isSuccess: false döndür
+    res.status(400).json({
+      isSuccess: false,
+      error: error.message
+    });
   }
 });
 
