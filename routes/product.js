@@ -152,5 +152,27 @@ router.get('/getProductsByCategory/:categoryId', async (req, res) => {
   }
 });
 
+router.get('/getProductDetailByProductId/:productId', async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const products = await Product.find({ _id: productId })
+      .populate('category_id', 'name')
+      .lean()
+      .exec();
+
+    res.status(200).json({
+      isSuccess: true,
+      data: products
+    });
+  } catch (error) {
+    console.error('Hata:', error.message);
+    res.status(400).json({
+      isSuccess: false,
+      error: error.message
+    });
+  }
+});
+
 
 module.exports = router;  // Router'ı dışa aktar
